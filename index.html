@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nadie Sale Solo — sigilo en la guarida de los orcos</title>
+<meta name="description" content="Eres la última esperanza de tu grupo para escapar de la mazmorra de los orcos. Aventura de sigilo de ritmo lento: observa, distrae y remata por la espalda. Jugable en el navegador.">
+
+<meta property="og:title" content="Nadie Sale Solo">
+<meta property="og:description" content="Ocho orcos, tres celdas y una daga que solo sirve si nadie te está mirando.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@400;600;800&family=IBM+Plex+Mono:wght@400;500&family=Spectral:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<div class="grano" aria-hidden="true"></div>
+
+<!-- ============================================================
+     Plano de la guarida. Se dibuja una sola vez aquí y se
+     reutiliza dos veces con <use>: a oscuras en la portada y
+     con luz en la sección del mapa.
+     Coordenadas: 1 unidad = 1 px del mapa original.
+     ============================================================ -->
+<svg class="oculto" aria-hidden="true" focusable="false">
+<defs>
+
+  <pattern id="rejilla" width="54" height="54" patternUnits="userSpaceOnUse">
+    <rect width="54" height="54" fill="#1C1613"/>
+    <path d="M54 0 V54 H0" fill="none" stroke="#2E2621" stroke-width="1"/>
+  </pattern>
+
+  <g id="ico-orco">
+    <circle r="11" class="ico-orco__base"/>
+    <path d="M-5.5,-2.5 l4,2.5 M5.5,-2.5 l-4,2.5 M-4,4.5 l4,2.5 l4,-2.5" class="ico-orco__cara"/>
+  </g>
+
+  <g id="ico-rehen">
+    <path d="M-9,-11 V11 M0,-11 V11 M9,-11 V11" class="ico-rehen__reja"/>
+    <circle cy="-2" r="3.2" class="ico-rehen__preso"/>
+  </g>
+
+  <g id="ico-arma">
+    <path d="M-10,6 C-2,6 6,1 11,-6 C6,-2 -2,0 -10,0 Z" class="ico-arma__hoja"/>
+    <path d="M-12,3 h4" class="ico-arma__puno"/>
+  </g>
+
+  <g id="ico-jugador">
+    <path d="M0,-11 C6,-11 10,-5 10,2 V10 H-10 V2 C-10,-5 -6,-11 0,-11 Z" class="ico-jugador__capa"/>
+    <path d="M-4,-1 h8" class="ico-jugador__ojos"/>
+  </g>
+
+  <symbol id="mapa" viewBox="0 0 1000 1210">
+
+    <!-- suelos -->
+    <g class="suelo">
+      <path d="M210,60 H510 V170 H650 V485 H210 Z"/>
+      <rect x="40"  y="155" width="165" height="215"/>
+      <rect x="40"  y="530" width="220" height="650"/>
+      <rect x="260" y="490" width="210" height="690"/>
+      <rect x="470" y="490" width="260" height="345"/>
+      <rect x="730" y="585" width="220" height="235"/>
+      <rect x="470" y="940" width="225" height="240"/>
+    </g>
+
+    <!-- mobiliario -->
+    <g class="mueble">
+      <rect x="330" y="215" width="76" height="150" class="mueble--alfombra"/>
+      <rect x="352" y="102" width="30" height="34"/>
+      <rect x="286" y="70"  width="20" height="24" class="mueble--estandarte"/>
+      <rect x="414" y="70"  width="20" height="24" class="mueble--estandarte"/>
+      <rect x="52"  y="222" width="76" height="42"/>
+      <rect x="585" y="618" width="56" height="172"/>
+      <rect x="552" y="648" width="24" height="24"/>
+      <rect x="552" y="736" width="24" height="24"/>
+      <rect x="650" y="648" width="24" height="24"/>
+      <rect x="650" y="736" width="24" height="24"/>
+      <rect x="898" y="612" width="52" height="76"/>
+      <rect x="752" y="748" width="96" height="26"/>
+      <rect x="82"  y="1102" width="86" height="34"/>
+      <rect x="180" y="1104" width="28" height="32"/>
+      <rect x="214" y="1104" width="28" height="32"/>
+    </g>
+
+    <!-- muros; los huecos son puertas y pasos -->
+    <g class="muro">
+      <!-- sala del trono -->
+      <path d="M210,60 H510 V170 H650 V485"/>
+      <path d="M650,485 H600 M565,485 H390 M350,485 H210"/>
+      <path d="M210,485 V270 M210,240 V60"/>
+      <path d="M510,285 V485"/>
+      <!-- alcoba noroeste -->
+      <path d="M205,155 H40 V370 H205"/>
+      <path d="M205,370 V270 M205,240 V155"/>
+      <!-- pasillo central -->
+      <path d="M260,490 H350 M390,490 H565 M600,490 H730"/>
+      <path d="M260,490 V545 M260,710 V760 M260,940 V1010 M260,1110 V1180"/>
+      <path d="M470,585 V960 M470,1060 V1180"/>
+      <path d="M260,1180 H345 M390,1180 H470"/>
+      <!-- cocina y bodega este -->
+      <path d="M470,585 H730 M730,490 V585"/>
+      <path d="M470,835 H730 V700 M730,660 V585"/>
+      <path d="M730,585 H950 V820 H730 V835"/>
+      <!-- celda sureste -->
+      <path d="M470,940 H695 V1180 H470"/>
+      <!-- celdas oeste -->
+      <path d="M40,530 H260 M40,530 V1180 H260"/>
+      <path d="M40,750 H260 M40,960 H260 M135,960 V1020"/>
+    </g>
+
+    <!-- puertas señaladas -->
+    <g class="puerta">
+      <path d="M350,485 H390 M565,485 H600 M345,1180 H390"/>
+    </g>
+
+    <!-- ocupantes -->
+    <g class="fichas">
+      <use href="#ico-orco" x="365" y="158"/>
+      <use href="#ico-orco" x="285" y="298"/>
+      <use href="#ico-orco" x="455" y="298"/>
+      <use href="#ico-orco" x="600" y="518"/>
+      <use href="#ico-orco" x="305" y="772"/>
+      <use href="#ico-orco" x="885" y="652"/>
+      <use href="#ico-orco" x="820" y="726"/>
+      <use href="#ico-orco" x="445" y="1032"/>
+
+      <use href="#ico-rehen" x="150" y="215"/>
+      <use href="#ico-rehen" x="110" y="646"/>
+      <use href="#ico-rehen" x="620" y="1032"/>
+
+      <use href="#ico-arma" x="607" y="676"/>
+      <use href="#ico-arma" x="125" y="1118"/>
+
+      <use href="#ico-jugador" x="107" y="862"/>
+    </g>
+
+    <!-- rótulos -->
+    <g class="rotulo">
+      <text x="222" y="46">SALA DEL TRONO</text>
+      <text x="40" y="141">CELDA NORTE</text>
+      <text x="40" y="516">CELDAS OESTE</text>
+      <text x="482" y="576">COCINA</text>
+      <text x="742" y="571">BODEGA</text>
+      <text x="482" y="926">CELDA SUR</text>
+      <text x="272" y="1204">SALIDA</text>
+    </g>
+
+  </symbol>
+</defs>
+</svg>
+
+<nav class="barra">
+  <a class="barra__marca" href="#inicio">Nadie&nbsp;Sale&nbsp;Solo</a>
+  <ul class="barra__enlaces">
+    <li><a href="#trabajo">El trabajo</a></li>
+    <li><a href="#juego">Cómo se juega</a></li>
+    <li><a href="#mapa">La guarida</a></li>
+  </ul>
+  <a class="barra__accion" href="#jugar">Jugar aquí</a>
+</nav>
+
+<header class="portada" id="inicio">
+
+  <div class="portada__texto">
+    <p class="ojo">Sigilo · Rescate · Un solo ladrón</p>
+    <h1 class="titulo">Nadie<br>sale<br>solo</h1>
+    <p class="entrada">Seguiste a unos aventureros por el oro y terminaron todos en una guarida de orcos. Tú eres el único que sigue suelto: ocho orcos entre tus compañeros y la salida, y ninguno puede llegar a gritar.</p>
+    <div class="botones">
+      <a class="boton boton--luz" href="#jugar">Jugar en el navegador</a>
+      <a class="boton" href="#trabajo">Leer el plan</a>
+    </div>
+    <p class="ficha">Se juega aquí mismo · Sin descargas · Hecho en Unity</p>
+  </div>
+
+  <figure class="plano" id="plano">
+    <svg class="plano__svg" viewBox="0 0 1000 1210" role="img" aria-label="Plano de la guarida de los orcos">
+      <use href="#mapa"/>
+    </svg>
+    <div class="plano__sombra" aria-hidden="true"></div>
+    <figcaption class="plano__pie">Planta de la guarida — mueve la luz</figcaption>
+  </figure>
+
+</header>
+
+<main>
+
+<section class="seccion" id="trabajo">
+  <div class="seccion__cabeza revelar">
+    <p class="ojo">El trabajo</p>
+    <h2 class="rubro">Eres la última esperanza de tu grupo</h2>
+    <p class="parrafo">Eres un ladrón cuyo nombre dejó de importar hace mucho. Lo único que creías que te importaba era el oro, y por eso seguiste a los aventureros que te reclutaron en tu taberna de confianza. El encargo era rastrear a los orcos que venían atormentando a un pueblo; salió mal y acabaron encerrados en la mazmorra que esos orcos gobiernan.</p>
+    <p class="parrafo parrafo--seguido">Ahora tienes claro lo que sigue: sacar a tus compañeros, salir de ahí y cobrar la recompensa. Con todos los orcos que se interpongan en el camino, claramente.</p>
+  </div>
+
+  <div class="reglas">
+    <article class="regla revelar">
+      <h3>Atacar sin ser visto</h3>
+      <p>El ataque básico solo funciona si estás cerca de un orco y no te está mirando. De frente no eres nada: la partida se gana aprovechando las distracciones que ya existen, o creando las que hagan falta, para poder rematar por la espalda.</p>
+    </article>
+    <article class="regla revelar">
+      <h3>Analizar antes de moverte</h3>
+      <p>Es una aventura de ritmo lento y está bien que lo sea. Quedarte quieto mirando quién ve qué no es perder el tiempo: es la mitad del juego. La sala se resuelve en la cabeza antes de resolverse con la daga.</p>
+    </article>
+    <article class="regla revelar">
+      <h3>Nadie se queda atrás</h3>
+      <p>El nivel no termina hasta que los tres rehenes estén libres. No puedes tomar el camino corto hasta la salida: hay que recorrer la guarida entera, y eso significa cruzar salas que preferirías rodear.</p>
+    </article>
+    <article class="regla revelar">
+      <h3>Los orcos reaccionan</h3>
+      <p>No patrullan, pero eso no los vuelve estatuas. Se alertan si entras en su campo de visión, si un compañero suyo cae cerca de ellos, o si te acercas haciendo demasiado ruido. Un cadáver mal colocado alerta al de al lado.</p>
+    </article>
+  </div>
+</section>
+
+<section class="seccion" id="juego">
+  <div class="seccion__cabeza revelar">
+    <p class="ojo">Cómo se juega</p>
+    <h2 class="rubro">Dos herramientas, muchas maneras de usarlas mal</h2>
+  </div>
+
+  <div class="banda">
+    <article class="ficha-banda revelar">
+      <p class="ficha-banda__oficio">Cuerpo a cuerpo</p>
+      <h3 class="ficha-banda__nombre">La daga</h3>
+      <p>Se ejecuta pegado al enemigo y solo si no está mirando. Es limpia, silenciosa y no perdona el error de cálculo: si se voltea mientras te acercas, la sala completa se te viene encima.</p>
+    </article>
+    <article class="ficha-banda revelar">
+      <p class="ficha-banda__oficio">A distancia</p>
+      <h3 class="ficha-banda__nombre">El cuchillo arrojadizo</h3>
+      <p>Acaba con un orco sin exponerte a cruzar la sala, y es lo que salva las habitaciones con varios enemigos juntos. Llevas una cantidad contada: la UI te la recuerda, y recogerlos otra vez cuesta caro.</p>
+    </article>
+    <article class="ficha-banda revelar">
+      <p class="ficha-banda__oficio">Progresión</p>
+      <h3 class="ficha-banda__nombre">Herramientas nuevas</h3>
+      <p>Hay dos armas escondidas en la guarida, una en la cocina y otra en la bodega del suroeste. Encontrarlas cambia lo que puedes intentar en las salas que vengan después, así que desviarte a buscarlas casi siempre paga.</p>
+    </article>
+    <article class="ficha-banda__hueco revelar" aria-hidden="true"></article>
+  </div>
+</section>
+
+<section class="seccion" id="mapa">
+  <div class="seccion__cabeza revelar">
+    <p class="ojo">La guarida</p>
+    <h2 class="rubro">Una sola planta, y ni un pasillo de sobra</h2>
+    <p class="parrafo">Entras por el sur y empiezas en las celdas del oeste, donde te dejaron por muerto. El trono está en el extremo opuesto: para llegar hay que cruzar el pasillo central, que es ancho, abierto y visible desde tres puertas a la vez.</p>
+  </div>
+
+  <div class="mapa-completo revelar">
+    <svg class="mapa-completo__svg" viewBox="0 0 1000 1210" role="img" aria-label="Plano completo de la guarida con la posición de los orcos, los rehenes, las armas y el jugador">
+      <use href="#mapa"/>
+    </svg>
+
+    <ul class="leyenda">
+      <li>
+        <svg viewBox="-16 -16 32 32" aria-hidden="true"><use href="#ico-orco"/></svg>
+        <div><strong>Orco</strong><span>Ocho en total. Fijos, pero atentos.</span></div>
+      </li>
+      <li>
+        <svg viewBox="-16 -16 32 32" aria-hidden="true"><use href="#ico-rehen"/></svg>
+        <div><strong>Rehén</strong><span>Tres. Los tres son obligatorios.</span></div>
+      </li>
+      <li>
+        <svg viewBox="-16 -16 32 32" aria-hidden="true"><use href="#ico-arma"/></svg>
+        <div><strong>Arma nueva</strong><span>Dos, fuera del camino corto.</span></div>
+      </li>
+      <li>
+        <svg viewBox="-16 -16 32 32" aria-hidden="true"><use href="#ico-jugador"/></svg>
+        <div><strong>Tú</strong><span>Empiezas en la celda del medio.</span></div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="jugar" id="jugar">
+  <div class="jugar__intro revelar">
+    <p class="ojo">Pruébalo</p>
+    <h2 class="rubro">La guarida completa, aquí mismo</h2>
+    <p class="parrafo">El nivel se puede ganar y se puede perder. Corre en el navegador, sin instalar nada. Se recomienda con audífonos: media partida se juega escuchando dónde está el otro.</p>
+  </div>
+
+  <div class="marco revelar">
+    <!--
+      Opción 1 (recomendada): sube tu build WebGL de Unity a una carpeta /juego
+      en este mismo repo y el iframe la carga solo. No cambies nada.
+
+      Opción 2: si prefieres servirlo desde itch.io, reemplaza el valor de
+      data-juego por la URL del embed que te da itch, por ejemplo:
+      data-juego="https://itch.io/embed-upload/1234567?color=100c0b"
+    -->
+    <div class="marco__caja" data-juego="juego/index.html">
+      <div class="marco__portada">
+        <p class="marco__aviso">Se carga al pulsar. Pesa unos cuantos megas.</p>
+        <button class="boton boton--luz" type="button" id="encender">Entrar a la guarida</button>
+      </div>
+    </div>
+
+    <ul class="controles">
+      <li><span>WASD</span> moverte</li>
+      <li><span>Ctrl</span> agacharte</li>
+      <li><span>Clic izq.</span> atacar</li>
+      <li><span>Mouse</span> mirar alrededor</li>
+    </ul>
+
+    <p class="ficha marco__pie">¿Se te traba? <a href="https://sirmatthewv.itch.io" target="_blank" rel="noopener">Abrir en itch.io</a></p>
+  </div>
+</section>
+
+<section class="cierre">
+  <div class="revelar">
+    <h2 class="cierre__titulo">Tres celdas.<br>Ocho orcos.<br>Ni un grito.</h2>
+    <a class="boton boton--luz" href="#jugar">Jugar en el navegador</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="pie">
+  <p>Nadie Sale Solo — un juego de <a href="https://sirmatthewv.itch.io" target="_blank" rel="noopener">Mateo Úsuga</a></p>
+  <p class="pie__enlaces">
+    <a href="#" target="_blank" rel="noopener">Devlog</a>
+    <a href="#" target="_blank" rel="noopener">YouTube</a>
+    <a href="https://sirmatthewv.itch.io" target="_blank" rel="noopener">itch.io</a>
+  </p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
