@@ -159,6 +159,7 @@
     <li><a href="#trabajo">El trabajo</a></li>
     <li><a href="#juego">Cómo se juega</a></li>
     <li><a href="#mapa">La guarida</a></li>
+    <li><a href="#galeria">Galería</a></li>
   </ul>
   <a class="barra__accion" href="#jugar">Jugar aquí</a>
 </nav>
@@ -275,6 +276,59 @@
   </div>
 </section>
 
+<!-- ============================================================
+     GALERÍA
+
+     Para añadir una imagen, copia un bloque <figure> completo y
+     cambia tres cosas: src, alt y el texto del <figcaption>.
+     El orden en el HTML es el orden en pantalla.
+
+     · Guarda los archivos en una carpeta  imagenes/  del repo.
+     · Formato: JPG o WebP, ancho máximo 1600 px. PNG solo para
+       capturas de UI con texto fino.
+     · Pon width y height reales de cada imagen: evita que la
+       página salte mientras cargan.
+     · class="galeria__pieza--ancha" ocupa dos columnas. Úsala
+       para panorámicas; no más de una o dos en toda la galería.
+     · Si dejas menos de tres imágenes la grilla se acomoda sola.
+     ============================================================ -->
+<section class="seccion" id="galeria">
+  <div class="seccion__cabeza revelar">
+    <p class="ojo">Galería</p>
+    <h2 class="rubro">Cómo se ve por dentro</h2>
+    <p class="parrafo">Capturas del nivel en Unity. Pulsa cualquiera para verla en grande; con el teclado se navega con las flechas y se cierra con Escape.</p>
+  </div>
+
+  <div class="galeria revelar">
+
+    <figure class="galeria__pieza galeria__pieza--ancha">
+      <img src="imagenes/01-pasillo.jpg" alt="Pasillo central de la guarida iluminado por antorchas" width="1600" height="900" loading="lazy" decoding="async">
+      <figcaption>El pasillo central: ancho, abierto y visible desde tres puertas.</figcaption>
+    </figure>
+
+    <figure class="galeria__pieza">
+      <img src="imagenes/02-trono.jpg" alt="Sala del trono con estandartes y alfombra roja" width="1600" height="900" loading="lazy" decoding="async">
+      <figcaption>La sala del trono, al fondo de la guarida.</figcaption>
+    </figure>
+
+    <figure class="galeria__pieza">
+      <img src="imagenes/03-celda.jpg" alt="Celda con un rehén tras las rejas" width="1600" height="900" loading="lazy" decoding="async">
+      <figcaption>Uno de los tres rehenes. No hay final sin los tres.</figcaption>
+    </figure>
+
+    <figure class="galeria__pieza">
+      <img src="imagenes/04-sigilo.jpg" alt="El ladrón agachado detrás de un orco desprevenido" width="1600" height="900" loading="lazy" decoding="async">
+      <figcaption>Por la espalda o nada.</figcaption>
+    </figure>
+
+    <figure class="galeria__pieza">
+      <img src="imagenes/05-cocina.jpg" alt="Cocina de la guarida con la mesa larga y los baúles" width="1600" height="900" loading="lazy" decoding="async">
+      <figcaption>La cocina esconde una de las dos armas nuevas.</figcaption>
+    </figure>
+
+  </div>
+</section>
+
 <section class="jugar" id="jugar">
   <div class="jugar__intro revelar">
     <p class="ojo">Pruébalo</p>
@@ -284,14 +338,11 @@
 
   <div class="marco revelar">
     <!--
-      Opción 1 (recomendada): sube tu build WebGL de Unity a una carpeta /juego
-      en este mismo repo y el iframe la carga solo. No cambies nada.
-
-      Opción 2: si prefieres servirlo desde itch.io, reemplaza el valor de
-      data-juego por la URL del embed que te da itch, por ejemplo:
-      data-juego="https://itch.io/embed-upload/1234567?color=100c0b"
+      data-juego lleva SOLO la URL, nunca el <iframe> completo que copia itch.
+      Si vuelves a subir el build, itch genera un embed-upload nuevo: cambia
+      el número y deja el resto igual.
     -->
-    <div class="marco__caja" data-juego="https://itch.io/embed-upload/18855789?color=333333">
+    <div class="marco__caja" data-juego="https://itch.io/embed-upload/18855789?color=100c0b">
       <div class="marco__portada">
         <p class="marco__aviso">Se carga al pulsar. Pesa unos cuantos megas.</p>
         <button class="boton boton--luz" type="button" id="encender">Entrar a la guarida</button>
@@ -305,7 +356,7 @@
       <li><span>Mouse</span> mirar alrededor</li>
     </ul>
 
-    <p class="ficha marco__pie">¿Se te traba? <a href="https://sirmatthewv.itch.io" target="_blank" rel="noopener">Abrir en itch.io</a></p>
+    <p class="ficha marco__pie">¿Se te traba? <a href="https://sirmatthewv.itch.io/rogue-game" target="_blank" rel="noopener">Abrir en itch.io</a></p>
   </div>
 </section>
 
@@ -319,13 +370,24 @@
 </main>
 
 <footer class="pie">
-  <p>Nadie Sale Solo — un juego de <a href="https://sirmatthewv.itch.io" target="_blank" rel="noopener">Mateo Úsuga</a></p>
+  <p>The Thief's Cut — un juego de <a href="https://sirmatthewv.itch.io" target="_blank" rel="noopener">Mateo Úsuga</a></p>
   <p class="pie__enlaces">
     <a href="#" target="_blank" rel="noopener">Devlog</a>
     <a href="#" target="_blank" rel="noopener">YouTube</a>
     <a href="https://sirmatthewv.itch.io" target="_blank" rel="noopener">itch.io</a>
   </p>
 </footer>
+
+<!-- Visor de la galería; el JS lo llena y lo abre -->
+<div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Imagen ampliada" hidden>
+  <button class="visor__cerrar" type="button" data-visor="cerrar" aria-label="Cerrar">&times;</button>
+  <button class="visor__paso visor__paso--atras" type="button" data-visor="atras" aria-label="Anterior">&#8249;</button>
+  <button class="visor__paso visor__paso--siguiente" type="button" data-visor="siguiente" aria-label="Siguiente">&#8250;</button>
+  <figure class="visor__marco">
+    <img id="visor-img" src="" alt="">
+    <figcaption id="visor-pie"></figcaption>
+  </figure>
+</div>
 
 <script src="script.js"></script>
 </body>
