@@ -1,8 +1,9 @@
 /* ============================================================
-   Nadie Sale Solo — comportamiento
+   The Thief's Cut — comportamiento
    1. La antorcha recorre el plano de la portada
    2. Los bloques aparecen al bajar
-   3. El juego se carga solo cuando lo piden
+   3. Visor de la galería
+   4. El juego se carga solo cuando lo piden
    ============================================================ */
 
 (function () {
@@ -68,7 +69,78 @@
     });
   }
 
-  /* ---------- 3. Cargar el juego bajo demanda ---------- */
+  /* ---------- 4. Visor de la galería ---------- */
+
+  var piezas = Array.prototype.slice.call(
+    document.querySelectorAll('.galeria__pieza img')
+  );
+  var visor = document.getElementById('visor');
+
+  if (piezas.length && visor) {
+    var visorImg = document.getElementById('visor-img');
+    var visorPie = document.getElementById('visor-pie');
+    var actual = 0;
+    var previo = null;
+
+    function mostrar(i) {
+      actual = (i + piezas.length) % piezas.length;
+      var img = piezas[actual];
+      var pie = img.parentElement.querySelector('figcaption');
+
+      visorImg.src = img.currentSrc || img.src;
+      visorImg.alt = img.alt || '';
+      visorPie.textContent = pie ? pie.textContent : '';
+    }
+
+    function abrir(i) {
+      previo = document.activeElement;
+      mostrar(i);
+      visor.hidden = false;
+      document.body.style.overflow = 'hidden';
+      visor.querySelector('[data-visor="cerrar"]').focus();
+    }
+
+    function cerrar() {
+      visor.hidden = true;
+      visorImg.src = '';
+      document.body.style.overflow = '';
+      if (previo && previo.focus) previo.focus();
+    }
+
+    // Cada imagen abre el visor, con mouse y con teclado
+    piezas.forEach(function (img, i) {
+      img.tabIndex = 0;
+      img.setAttribute('role', 'button');
+
+      img.addEventListener('click', function () { abrir(i); });
+
+      img.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          abrir(i);
+        }
+      });
+    });
+
+    visor.addEventListener('click', function (e) {
+      var accion = e.target.getAttribute('data-visor');
+
+      if (accion === 'cerrar') cerrar();
+      else if (accion === 'atras') mostrar(actual - 1);
+      else if (accion === 'siguiente') mostrar(actual + 1);
+      else if (e.target === visor) cerrar(); // clic en el fondo
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (visor.hidden) return;
+
+      if (e.key === 'Escape') cerrar();
+      else if (e.key === 'ArrowLeft') mostrar(actual - 1);
+      else if (e.key === 'ArrowRight') mostrar(actual + 1);
+    });
+  }
+
+  /* ---------- 5. Cargar el juego bajo demanda ---------- */
 
   var encender = document.getElementById('encender');
   var caja = document.querySelector('.marco__caja');
@@ -80,7 +152,7 @@
 
       var marco = document.createElement('iframe');
       marco.src = fuente;
-      marco.title = 'Nadie Sale Solo — versión jugable';
+      marco.title = "The Thief's Cut — versión jugable";
       marco.allow = 'fullscreen; autoplay; gamepad';
       marco.setAttribute('allowfullscreen', '');
 
