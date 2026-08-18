@@ -448,6 +448,136 @@ a{color:inherit;}
   line-height:1.45;
 }
 
+/* ---------- Galería ---------- */
+
+.galeria{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+  gap:1px;
+  background:var(--piedra-alta);
+  border:1px solid var(--piedra-alta);
+}
+
+.galeria__pieza{
+  position:relative;
+  margin:0;
+  background:var(--piedra);
+  overflow:hidden;
+}
+
+.galeria__pieza--ancha{grid-column:span 2;}
+
+.galeria__pieza img{
+  width:100%;
+  aspect-ratio:16 / 9;
+  object-fit:cover;
+  cursor:zoom-in;
+  filter:saturate(.9) contrast(1.02);
+  transition:transform .6s ease, filter .4s ease;
+}
+
+.galeria__pieza:hover img,
+.galeria__pieza:focus-within img{
+  transform:scale(1.035);
+  filter:saturate(1) contrast(1.05);
+}
+
+.galeria__pieza figcaption{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:2.6rem 1.2rem .9rem;
+  font-family:var(--util);
+  font-size:.72rem;
+  line-height:1.5;
+  letter-spacing:.06em;
+  color:var(--tiza);
+  background:linear-gradient(to top, rgba(16,12,11,.92), rgba(16,12,11,0));
+  pointer-events:none;
+}
+
+/* Imagen que aún no existe: el hueco se ve intencional, no roto */
+.galeria__pieza img:not([src]),
+.galeria__pieza img[src=""]{visibility:hidden;}
+
+/* ---------- Visor ---------- */
+
+.visor{
+  position:fixed;
+  inset:0;
+  z-index:40;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:clamp(1rem, 4vw, 3rem);
+  background:rgba(10,8,7,.96);
+  animation:visor-entra .25s ease;
+}
+
+.visor[hidden]{display:none;}
+
+@keyframes visor-entra{from{opacity:0;}to{opacity:1;}}
+
+.visor__marco{
+  margin:0;
+  max-width:min(1100px, 92vw);
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+}
+
+.visor__marco img{
+  max-width:100%;
+  max-height:78svh;
+  width:auto;
+  height:auto;
+  margin:0 auto;
+  border:1px solid var(--piedra-alta);
+}
+
+.visor__marco figcaption{
+  font-family:var(--util);
+  font-size:.74rem;
+  letter-spacing:.08em;
+  color:var(--tiza-tenue);
+  text-align:center;
+}
+
+.visor__cerrar,
+.visor__paso{
+  position:absolute;
+  background:transparent;
+  border:1px solid var(--piedra-alta);
+  color:var(--tiza);
+  font-family:var(--util);
+  cursor:pointer;
+  line-height:1;
+  transition:border-color .2s, color .2s;
+}
+
+.visor__cerrar:hover,
+.visor__paso:hover{border-color:var(--brasa);color:var(--brasa);}
+
+.visor__cerrar{
+  top:clamp(1rem, 3vw, 2rem);
+  right:clamp(1rem, 3vw, 2rem);
+  width:2.7rem;
+  height:2.7rem;
+  font-size:1.5rem;
+}
+
+.visor__paso{
+  top:50%;
+  transform:translateY(-50%);
+  width:2.7rem;
+  height:4rem;
+  font-size:1.8rem;
+}
+
+.visor__paso--atras{left:clamp(.5rem, 2vw, 2rem);}
+.visor__paso--siguiente{right:clamp(.5rem, 2vw, 2rem);}
+
 /* ---------- Sala de juego ---------- */
 
 .jugar{
@@ -601,6 +731,15 @@ a{color:inherit;}
   .barra{gap:1rem;justify-content:space-between;}
   .ficha-banda__hueco{display:none;}
   .mapa-completo__svg{padding:.5rem;}
+  .galeria{grid-template-columns:1fr;}
+  .galeria__pieza--ancha{grid-column:auto;}
+  .visor__paso{
+    top:auto;
+    bottom:clamp(.5rem, 3vw, 2rem);
+    transform:none;
+    width:3.2rem;
+    height:3rem;
+  }
 }
 
 /* ---------- Menos movimiento ---------- */
@@ -608,5 +747,7 @@ a{color:inherit;}
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto;}
   .js .revelar{opacity:1;transform:none;transition:none;}
+  .galeria__pieza:hover img,
+  .galeria__pieza:focus-within img{transform:none;}
   *{animation-duration:.01ms !important;transition-duration:.01ms !important;}
 }
